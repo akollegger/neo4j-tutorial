@@ -2,11 +2,12 @@ package org.neo4j.tutorial;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.index.Index;
+import org.neo4j.graphdb.index.UniqueFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static org.neo4j.tutorial.DatabaseHelper.ensureRelationshipInDb;
 
@@ -47,16 +48,8 @@ public class ActorBuilder
 
     private Node ensureActorIsInDb(GraphDatabaseService db)
     {
-        Index<Node> index = db.index().forNodes("actors");
-        Node actor = index.get("actor", actorName).getSingle();
+        Node actor = getOrCreateUniqueActor(actorName, db);
 
-        if (actor == null)
-        {
-            actor = db.createNode();
-            actor.setProperty("actor", actorName);
-            index.add(actor, "actor", actorName);
-        }
-        
         if(wikipediaUri != null) {
             actor.setProperty("wikipedia", wikipediaUri);
         }
@@ -67,6 +60,19 @@ public class ActorBuilder
         }
 
         return actor;
+    }
+
+    private Node getOrCreateUniqueActor(String actorName, GraphDatabaseService graphDb)
+    {
+        UniqueFactory<Node> factory = new UniqueFactory.UniqueNodeFactory( graphDb, "actors" )
+        {
+            @Override
+            protected void initialize( Node created, Map <String, Object> properties )
+            {
+                created.setProperty( "actor", properties.get( "actor" ) );
+            }
+        };
+        return factory.getOrCreate( "actor", actorName );
     }
 
     private void ensureCharacterIsInDb(Node actor, GraphDatabaseService db)

@@ -2,6 +2,7 @@ package org.neo4j.tutorial;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.index.UniqueFactory;
 
 import java.util.*;
 
@@ -142,6 +143,7 @@ public class CharacterBuilder
                     .forNodes( "actors" )
                     .get( "actor", actor )
                     .getSingle();
+
             if ( theActorNode == null )
             {
                 theActorNode = db.createNode();
@@ -237,17 +239,16 @@ public class CharacterBuilder
 
     public static Node ensureCharacterIsInDb( String name, GraphDatabaseService db )
     {
-        Node theCharacterNode = db.index()
-                .forNodes( "characters" )
-                .get( "character", name )
-                .getSingle();
-        if ( theCharacterNode == null )
+        UniqueFactory<Node> factory = new UniqueFactory.UniqueNodeFactory( db, "characters" )
         {
-            theCharacterNode = db.createNode();
-            theCharacterNode.setProperty( "character", name );
-            ensureCharacterIsIndexed( theCharacterNode, db );
-        }
-        return theCharacterNode;
+            @Override
+            protected void initialize( Node created, Map <String, Object> properties )
+            {
+                created.setProperty( "character", properties.get( "character" ) );
+            }
+        };
+        return factory.getOrCreate( "character", name );
+
     }
 
     private static void ensureCharacterIsIndexed( Node characterNode, GraphDatabaseService database )
