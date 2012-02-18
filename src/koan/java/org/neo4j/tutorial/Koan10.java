@@ -2,6 +2,7 @@ package org.neo4j.tutorial;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphmatching.CommonValueMatchers;
@@ -20,6 +21,7 @@ import static org.neo4j.tutorial.matchers.ContainsOnlySpecificTitles.containsOnl
  * In this Koan we use the graph-matching library to look for patterns in the
  * Doctor's universe.
  */
+@Ignore
 public class Koan10
 {
 

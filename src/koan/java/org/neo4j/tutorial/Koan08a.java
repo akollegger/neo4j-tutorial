@@ -41,11 +41,7 @@ public class Koan08a
         String cql = null;
 
         // YOUR CODE GOES HERE
-        // SNIPPET_START
-
-        cql = "start doctor = node:characters(character='Doctor') return doctor";
-
-        // SNIPPET_END
+        cql = "start doctor=node:characters(character='Doctor') return doctor";
 
         ExecutionResult result = engine.execute(cql);
         Iterator<Node> episodes = result.javaColumnAs("doctor");
@@ -64,13 +60,7 @@ public class Koan08a
         String cql = null;
 
         // YOUR CODE GOES HERE
-        // SNIPPET_START
-
-        cql = "start episodes= node:episodes('episode:*') "
-                + "return count(episodes)";
-
-
-        // SNIPPET_END
+        cql = "start episodes=node:episodes('episode:*') return count(episodes)";
 
         ExecutionResult result = engine.execute(cql);
 
@@ -84,11 +74,7 @@ public class Koan08a
         String cql = null;
 
         // YOUR CODE GOES HERE
-        // SNIPPET_START
-
-        cql = "start cybermen = node:species(species ='Cyberman') match (cybermen)-[:APPEARED_IN]->(episode) return episode";
-
-        // SNIPPET_END
+        cql = "start cybermen=node:species(species='Cyberman') match (cybermen)-[:APPEARED_IN]->(episode) return episode";
 
         ExecutionResult result = engine.execute(cql);
         Iterator<Node> episodes = result.javaColumnAs("episode");
@@ -116,13 +102,9 @@ public class Koan08a
         String cql = null;
 
         // YOUR CODE GOES HERE
-        // SNIPPET_START
-
-        cql = "start daleks = node:species(species = 'Dalek'), rose = node:characters(character = 'Rose Tyler'), tennant = node:actors(actor = 'David Tennant')";
-        cql += "match (tennant)-[:APPEARED_IN]->(episode), (rose)-[:APPEARED_IN]->(episode), (daleks)-[:APPEARED_IN]->(episode)";
-        cql += "return episode";
-
-        // SNIPPET_END
+        cql = "start tennant=node:actors(actor='David Tennant'), rose=node:characters(character='Rose Tyler'), daleks=node:species(species='Dalek') " +
+                "match (tennant)-[:APPEARED_IN]->(episode), (rose)-[:APPEARED_IN]->(episode), (daleks)-[:APPEARED_IN]->(episode) " +
+                "return episode";
 
         ExecutionResult result = engine.execute(cql);
         Iterator<Node> episodes = result.javaColumnAs("episode");

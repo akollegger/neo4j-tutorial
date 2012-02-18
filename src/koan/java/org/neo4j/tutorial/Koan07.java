@@ -10,6 +10,7 @@ import org.neo4j.graphdb.traversal.Evaluation;
 import org.neo4j.graphdb.traversal.Evaluator;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.kernel.Traversal;
+import org.neo4j.kernel.Uniqueness;
 
 import static org.junit.Assert.assertThat;
 import static org.neo4j.tutorial.matchers.ContainsOnlySpecificActors.containsOnlyActors;
@@ -43,27 +44,18 @@ public class Koan07
         TraversalDescription regeneratedActors = null;
 
         // YOUR CODE GOES HERE
-        // SNIPPET_START
-
         regeneratedActors = Traversal.description()
-                                     .relationships(DoctorWhoRelationships.PLAYED, Direction.INCOMING)
-                                     .breadthFirst()
-                                     .evaluator(new Evaluator()
-                                     {
-                                         public Evaluation evaluate(Path path)
-                                         {
-                                             if (path.endNode().hasRelationship(DoctorWhoRelationships.REGENERATED_TO))
-                                             {
-                                                 return Evaluation.INCLUDE_AND_CONTINUE;
-                                             }
-                                             else
-                                             {
-                                                 return Evaluation.EXCLUDE_AND_CONTINUE;
-                                             }
-                                         }
-                                     });
-
-        // SNIPPET_END
+                .relationships(DoctorWhoRelationships.PLAYED, Direction.INCOMING)
+                .depthFirst()
+                .uniqueness(Uniqueness.NODE_GLOBAL)
+                .evaluator(new Evaluator() {
+                    public Evaluation evaluate(Path path) {
+                        if (path.endNode().hasRelationship(DoctorWhoRelationships.REGENERATED_TO)) {
+                            return Evaluation.INCLUDE_AND_CONTINUE;
+                        }
+                        return Evaluation.EXCLUDE_AND_CONTINUE;
+                    }
+                });
 
         assertThat(regeneratedActors.traverse(theDoctor).nodes(), containsNumberOfNodes(11));
     }
@@ -75,36 +67,21 @@ public class Koan07
         TraversalDescription firstDoctor = null;
 
         // YOUR CODE GOES HERE
-        // SNIPPET_START
-
         firstDoctor = Traversal.description()
-                               .relationships(DoctorWhoRelationships.PLAYED, Direction.INCOMING)
-                               .depthFirst()
-                               .evaluator(new Evaluator()
-                               {
-                                   public Evaluation evaluate(Path path)
-                                   {
-                                       if (path.endNode().hasRelationship(DoctorWhoRelationships.REGENERATED_TO,
-                                                                          Direction.INCOMING))
-                                       {
-                                           return Evaluation.EXCLUDE_AND_CONTINUE;
-                                       }
-                                       else if (!path.endNode().hasRelationship(DoctorWhoRelationships.REGENERATED_TO,
-                                                                                Direction.OUTGOING))
-                                       {
-                                           // Catches Richard Hurdnall who played the William
-                                           // Hartnell's Doctor in The Five Doctors (William
-                                           // Hartnell had died by then)
-                                           return Evaluation.EXCLUDE_AND_CONTINUE;
-                                       }
-                                       else
-                                       {
-                                           return Evaluation.INCLUDE_AND_PRUNE;
-                                       }
-                                   }
-                               });
-
-        // SNIPPET_END
+                .relationships(DoctorWhoRelationships.PLAYED, Direction.INCOMING)
+                .breadthFirst()
+                .uniqueness(Uniqueness.NODE_GLOBAL)
+                .evaluator(new Evaluator() {
+                    public Evaluation evaluate(Path path) {
+                        if (path.endNode().hasRelationship(Direction.OUTGOING, DoctorWhoRelationships.REGENERATED_TO) &&
+                                !path.endNode().hasRelationship(Direction.INCOMING, DoctorWhoRelationships.REGENERATED_TO))
+                        {
+                            return Evaluation.INCLUDE_AND_CONTINUE;
+                        }
+                        return Evaluation.EXCLUDE_AND_CONTINUE;
+                    }
+                });
+                
 
         assertThat(firstDoctor.traverse(theDoctor).nodes(), containsOnlyActors("William Hartnell"));
     }

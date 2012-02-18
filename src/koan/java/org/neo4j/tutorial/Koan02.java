@@ -36,20 +36,14 @@ public class Koan02
     {
         Node node = null;
 
-        // YOUR CODE GOES HERE
-        // SNIPPET_START
-
         Transaction tx = db.beginTx();
-        try
-        {
+        try {
             node = db.createNode();
             tx.success();
-        } finally
-        {
+        }
+        finally {
             tx.finish();
         }
-
-        // SNIPPET_END
 
         assertTrue(databaseHelper.nodeExistsInDatabase(node));
     }
@@ -59,9 +53,6 @@ public class Koan02
     {
         Node theDoctor = null;
 
-        // YOUR CODE GOES HERE
-        // SNIPPET_START
-
         Transaction tx = db.beginTx();
         try
         {
@@ -69,12 +60,10 @@ public class Koan02
             theDoctor.setProperty("firstname", "William");
             theDoctor.setProperty("lastname", "Hartnell");
             tx.success();
-        } finally
-        {
+        }
+        finally {
             tx.finish();
         }
-
-        // SNIPPET_END
 
         assertTrue(databaseHelper.nodeExistsInDatabase(theDoctor));
 
@@ -91,28 +80,18 @@ public class Koan02
         Relationship companionRelationship = null;
 
         // YOUR CODE GOES HERE
-        // SNIPPET_START
-
         Transaction tx = db.beginTx();
         try
         {
             theDoctor = db.createNode();
-            theDoctor.setProperty("character", "Doctor");
-
             susan = db.createNode();
-            susan.setProperty("firstname", "Susan");
-            susan.setProperty("lastname", "Campbell");
-
-            companionRelationship = susan.createRelationshipTo(theDoctor,
-                                                               DoctorWhoRelationships.COMPANION_OF);
-
+            companionRelationship = susan.createRelationshipTo(theDoctor, DynamicRelationshipType.withName("COMPANION_OF"));
             tx.success();
-        } finally
+        }
+        finally
         {
             tx.finish();
         }
-
-        // SNIPPET_END
 
         Relationship storedCompanionRelationship = db.getRelationshipById(companionRelationship.getId());
         assertNotNull(storedCompanionRelationship);
@@ -127,29 +106,18 @@ public class Koan02
         Node captainKirk = createPollutedDatabaseContainingStarTrekReferences();
 
         // YOUR CODE GOES HERE
-        // SNIPPET_START
-
         Transaction tx = db.beginTx();
         try
         {
-
-            // This is the tricky part, you have to remove the active
-            // relationships before you can remove a node
-            Iterable<Relationship> relationships = captainKirk.getRelationships();
-            for (Relationship r : relationships)
-            {
+            for (Relationship r : captainKirk.getRelationships()) {
                 r.delete();
             }
-
             captainKirk.delete();
-
             tx.success();
-        } finally
-        {
+        }
+        finally {
             tx.finish();
         }
-
-        // SNIPPET_END
 
         try
         {
@@ -169,31 +137,18 @@ public class Koan02
         Node susan = createInaccurateDatabaseWhereSusanIsEnemyOfTheDoctor();
 
         // YOUR CODE GOES HERE
-        // SNIPPET_START
-
         Transaction tx = db.beginTx();
-        try
-        {
-
-            Iterable<Relationship> relationships = susan.getRelationships(DoctorWhoRelationships.ENEMY_OF,
-                                                                          Direction.OUTGOING);
-            for (Relationship r : relationships)
-            {
-                Node n = r.getEndNode();
-                if (n.hasProperty("character") && n.getProperty("character")
-                                                   .equals("The Doctor"))
-                {
+        try {
+            for (Relationship r : susan.getRelationships()) {
+                if (r.isType(DoctorWhoRelationships.ENEMY_OF)) {
                     r.delete();
                 }
             }
-
             tx.success();
-        } finally
-        {
+        }
+        finally {
             tx.finish();
         }
-
-        // SNIPPET_END
         assertEquals(1, databaseHelper.destructivelyCountRelationships(susan.getRelationships()));
     }
 

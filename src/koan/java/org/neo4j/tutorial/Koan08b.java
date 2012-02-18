@@ -47,14 +47,7 @@ public class Koan08b
         String cql = null;
 
         // YOUR CODE GOES HERE
-        // SNIPPET_START
-
-        cql = "start doctor = node:characters(character = 'Doctor') " +
-                "match (doctor)<-[:COMPANION_OF]-(companion)" +
-                "return companion.wikipedia?";
-
-
-        // SNIPPET_END
+        cql = "start doctor=node:characters(character='Doctor') MATCH (doctor)<-[:COMPANION_OF]-(companion) WHERE companion.wikipedia return companion.wikipedia";
 
         ExecutionResult result = engine.execute(cql);
         Iterator<String> iterator = result.javaColumnAs("companion.wikipedia");
@@ -72,13 +65,7 @@ public class Koan08b
         String cql = null;
 
         // YOUR CODE GOES HERE
-        // SNIPPET_START
-
-        cql = "start doctor = node:characters(character = 'Doctor')"
-                + "match (doctor)<-[:PLAYED]-(actor) "
-                + "return count(actor) as numberOfActorsWhoPlayedTheDoctor";
-
-        // SNIPPET_END
+        cql = "start doctor=node:characters(character='Doctor') MATCH (doctor)<-[:PLAYED]-(actor) return count(actor) as numberOfActorsWhoPlayedTheDoctor";
 
         ExecutionResult result = engine.execute(cql);
         Integer actorsCount = (Integer) result.javaColumnAs("numberOfActorsWhoPlayedTheDoctor").next();
@@ -93,13 +80,7 @@ public class Koan08b
         String cql = null;
 
         // YOUR CODE GOES HERE
-        // SNIPPET_START
-
-        cql = "start doctor = node:characters(character = 'Doctor') " +
-                "match (doctor)<-[:PLAYED]-()-[regen:REGENERATED_TO]->() " +
-                "return min(regen.year) as earliest, max(regen.year) as latest";
-
-        // SNIPPET_END
+        cql = "start doctor=node:characters(character='Doctor') MATCH (doctor)<-[:PLAYED]-(actor)-[r:REGENERATED_TO]->() return min(r.year) as earliest, max(r.year) as latest";
 
         ExecutionResult result = engine.execute(cql);
 
@@ -116,13 +97,9 @@ public class Koan08b
         String cql = null;
 
         // YOUR CODE GOES HERE
-        // SNIPPET_START
-
-        cql = "start david=node:actors(actor = 'David Tennant'), freema=node:actors(actor = 'Freema Agyeman'), doctor=node:characters(character = 'Doctor'), martha=node:characters(character = 'Martha Jones') "
-                + "match (freema)-[:PLAYED]->(martha)-[:APPEARED_IN]->(episode)<-[:APPEARED_IN]-(david)-[:PLAYED]->(doctor)"
-                + "return min(episode.episode) as earliest";
-
-        // SNIPPET_END
+        cql = "start freema=node:actors(actor='Freema Agyeman'), david=node:actors(actor='David Tennant') " +
+                "match (freema)-[:PLAYED]->(martha)-[:APPEARED_IN]->(episode), (david)-[:APPEARED_IN]->(episode) " +
+                "return min(episode.episode) as earliest";
 
         ExecutionResult result = engine.execute(cql);
 
@@ -136,14 +113,7 @@ public class Koan08b
         String cql = null;
 
         // YOUR CODE GOES HERE
-        // SNIPPET_START
-
-        cql = "start doctor = node:characters(character = 'Doctor')"
-                + "match (doctor)<-[:PLAYED]-(actor)"
-                + "return avg(actor.salary?) as cash";
-
-
-        // SNIPPET_END
+        cql = "start a=node:actors('actor:*') where a.salary return avg(a.salary) as cash";
 
         ExecutionResult result = engine.execute(cql);
 
@@ -157,17 +127,12 @@ public class Koan08b
         String cql = null;
 
         // YOUR CODE GOES HERE
-        // SNIPPET_START
-
-        cql = "start doctor = node:characters(character = 'Doctor')"
-                + "match (doctor)<-[:PLAYED]-(actor)-[:APPEARED_IN]->(episode)<-[:APPEARED_IN]-(enemy),"
-                + "(enemy)-[:ENEMY_OF]->(doctor)"
-                + "where actor.actor = 'Peter Davison'"
-                + "return episode.episode, episode.title, collect(enemy.species?) as species, collect(enemy.character?) as characters "
-                + "order by episode.episode";
-
-
-        // SNIPPET_END
+        cql = "start doctor=node:characters(character='Doctor') " +
+                "match (doctor)<-[:PLAYED]-(actor)-[:APPEARED_IN]->(episode)<-[:APPEARED_IN]-(enemy), " +
+                "(doctor)<-[:ENEMY_OF]-(enemy) " +
+                "where actor.actor='Peter Davison' " +
+                "return episode.episode, episode.title, collect(enemy.species?) as species, collect(enemy.character?) as characters " +
+                "order by episode.episode";
 
         ExecutionResult result = engine.execute(cql);
 
@@ -208,16 +173,9 @@ public class Koan08b
         String cql = null;
 
         // YOUR CODE GOES HERE
-        // SNIPPET_START
-
-        cql = "start rose = node:characters(character = 'Rose Tyler'), doctor = node:characters(character = 'Doctor') "
-                + "match (rose)-[:APPEARED_IN]->(episode), "
-                + "(doctor)-[:ENEMY_OF]->(enemy)-[:APPEARED_IN]->(episode) "
-                + "where enemy.species "
-                + "return distinct enemy.species as enemySpecies";
-
-
-        // SNIPPET_END
+        cql = "start rose=node:characters(character='Rose Tyler'), doctor=node:characters(character='Doctor') " +
+                "match (rose)-[:APPEARED_IN]->(episode)<-[:APPEARED_IN]-(enemy), (doctor)<-[:ENEMY_OF]-(enemy) " +
+                "return enemy.species? as enemySpecies";
 
         ExecutionResult result = engine.execute(cql);
         Iterator<String> enemySpecies = result.javaColumnAs("enemySpecies");
