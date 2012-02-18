@@ -41,8 +41,12 @@ public class Koan06
         Traverser t = null;
 
         // YOUR CODE GOES HERE
-        t = theDoctor.traverse(Order.DEPTH_FIRST, StopEvaluator.DEPTH_ONE, ReturnableEvaluator.ALL_BUT_START_NODE, DoctorWhoRelationships.COMPANION_OF,
-                Direction.INCOMING);
+        // SNIPPET_START
+
+        t = theDoctor.traverse(Order.DEPTH_FIRST, StopEvaluator.DEPTH_ONE, ReturnableEvaluator.ALL_BUT_START_NODE,
+                               DoctorWhoRelationships.COMPANION_OF, Direction.INCOMING);
+
+        // SNIPPET_END
 
         Collection<Node> foundCompanions = t.getAllNodes();
 
@@ -61,15 +65,19 @@ public class Koan06
         Traverser t = null;
 
         // YOUR CODE GOES HERE
-        // hint: start from theDaleks and follow the graph out to prop nodes
-        t = theDaleks.traverse(Order.BREADTH_FIRST, StopEvaluator.END_OF_GRAPH, new ReturnableEvaluator() {
-            public boolean isReturnableNode(TraversalPosition traversalPosition) {
-                return traversalPosition.currentNode().hasProperty("prop");
+        // SNIPPET_START
+
+        t = theDaleks.traverse(Order.DEPTH_FIRST, StopEvaluator.END_OF_GRAPH, new ReturnableEvaluator()
+        {
+            public boolean isReturnableNode(TraversalPosition currentPos)
+            {
+                return currentPos.currentNode()
+                                 .hasProperty("prop");
             }
-        },
-            DoctorWhoRelationships.APPEARED_IN, Direction.OUTGOING, DoctorWhoRelationships.USED_IN, Direction.INCOMING,
-                DoctorWhoRelationships.MEMBER_OF, Direction.INCOMING
-        );
+        }, DoctorWhoRelationships.APPEARED_IN, Direction.BOTH, DoctorWhoRelationships.USED_IN, Direction.INCOMING,
+                               DoctorWhoRelationships.MEMBER_OF, Direction.INCOMING);
+
+        // SNIPPET_END
 
         assertCollectionContainsAllDalekProps(t.getAllNodes());
     }
@@ -108,24 +116,35 @@ public class Koan06
         Traverser t = null;
 
         // YOUR CODE GOES HERE
-        final Node david = universe.getDatabase().index().forNodes("actors").get("actor", "David Tennant").getSingle();
-        
-        t = theMaster.traverse(Order.DEPTH_FIRST, StopEvaluator.END_OF_GRAPH, new ReturnableEvaluator() {
-            public boolean isReturnableNode(TraversalPosition traversalPosition) {
-                if (traversalPosition.currentNode().hasProperty("episode"))
+        // SNIPPET_START
+
+        t = theMaster.traverse(Order.DEPTH_FIRST, StopEvaluator.END_OF_GRAPH, new ReturnableEvaluator()
+        {
+            public boolean isReturnableNode(TraversalPosition currentPos)
+            {
+                if (currentPos.currentNode()
+                              .hasProperty("episode"))
                 {
-                    for (Relationship appearedIn : traversalPosition.currentNode().getRelationships(Direction.INCOMING, DoctorWhoRelationships.APPEARED_IN))
+                    Node episode = currentPos.currentNode();
+
+                    for (Relationship r : episode.getRelationships(DoctorWhoRelationships.APPEARED_IN,
+                                                                   Direction.INCOMING))
                     {
-                        Node actor = appearedIn.getStartNode();
-                        if (actor.equals(david)) {
+                        if (r.getStartNode()
+                             .hasProperty("actor") && r.getStartNode()
+                                                       .getProperty("actor")
+                                                       .equals("David Tennant"))
+                        {
                             return true;
                         }
                     }
                 }
+
                 return false;
             }
-        }, DoctorWhoRelationships.APPEARED_IN, Direction.OUTGOING
-                );
+        }, DoctorWhoRelationships.APPEARED_IN, Direction.OUTGOING);
+
+        // SNIPPET_END
 
         int numberOfEpisodesWithTennantVersusTheMaster = 4;
         assertEquals(numberOfEpisodesWithTennantVersusTheMaster, t.getAllNodes()

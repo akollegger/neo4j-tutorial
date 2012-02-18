@@ -18,7 +18,7 @@ import static org.neo4j.tutorial.matchers.CharacterAutoIndexContainsSpecificChar
 /**
  * After having done the hard work of managing an index for ourselves in the
  * previous Koan, this Koan will introduce auto-indexing which, in exchange for
- * following some conventions, will handle the lifecycle of nodes and
+ * following some conventions, will handle the lifefcycle of nodes and
  * relationships in the indexes automatically.
  */
 public class Koan04
@@ -46,9 +46,15 @@ public class Koan04
         AutoIndexer<Node> charactersAutoIndex = null;
 
         // YOUR CODE GOES HERE
-        charactersAutoIndex = universe.getDatabase().index().getNodeAutoIndexer();
+        // SNIPPET_START
+
+        charactersAutoIndex = universe.getDatabase()
+                                      .index()
+                                      .getNodeAutoIndexer();
         charactersAutoIndex.startAutoIndexingProperty("character-name");
         charactersAutoIndex.setEnabled(true);
+
+        // SNIPPET_END
 
         Transaction tx = universe.getDatabase()
                                  .beginTx();

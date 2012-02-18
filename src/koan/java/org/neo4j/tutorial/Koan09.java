@@ -55,11 +55,13 @@ public class Koan09
         Iterable<Path> paths = null;
 
         // YOUR CODE GOES HERE
-        PathFinder<Path> pathFinder = GraphAlgoFactory.pathsWithLength(Traversal.expanderForTypes(
-                DoctorWhoRelationships.APPEARED_IN, Direction.BOTH
-        ),
-                2);
+        // SNIPPET_START
+
+        PathFinder<Path> pathFinder = GraphAlgoFactory.pathsWithLength(
+                Traversal.expanderForTypes(DoctorWhoRelationships.APPEARED_IN, Direction.BOTH), 2);
         paths = pathFinder.findAllPaths(rose, daleks);
+
+        // SNIPPET_END
 
         assertThat(paths, consistPreciselyOf(rose, knownRoseVersusDaleksEpisodes(), daleks));
     }
@@ -97,9 +99,13 @@ public class Koan09
         Path path = null;
 
         // YOUR CODE GOES HERE
-        PathFinder<Path> pathFinder = GraphAlgoFactory.shortestPath(Traversal.expanderForTypes(DoctorWhoRelationships.REGENERATED_TO), 
-                100);
-        path = pathFinder.findSinglePath(delgado,simm);
+        // SNIPPET_START
+
+        PathFinder<Path> pathFinder = GraphAlgoFactory.shortestPath(
+                Traversal.expanderForTypes(DoctorWhoRelationships.REGENERATED_TO, Direction.OUTGOING), 100);
+        path = pathFinder.findSinglePath(delgado, simm);
+
+        // SNIPPET_END
 
         assertNotNull(path);
         int numberOfMasterRegenerations = 8;
@@ -123,8 +129,13 @@ public class Koan09
         Path path = null;
 
         // YOUR CODE GOES HERE
-        PathFinder<Path> pathFinder = GraphAlgoFactory.shortestPath(Traversal.expanderForTypes(DoctorWhoRelationships.APPEARED_IN), 2);
+        // SNIPPET_START
+
+        PathFinder<Path> pathFinder = GraphAlgoFactory.pathsWithLength(
+                Traversal.expanderForTypes(DoctorWhoRelationships.APPEARED_IN, Direction.BOTH), 2);
         path = pathFinder.findSinglePath(tennant, smith);
+
+        // SNIPPET_END
 
         assertNotNull(path);
         Node endOfTimeEpisode = universe.getDatabase()

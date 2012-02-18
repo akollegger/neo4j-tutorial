@@ -20,60 +20,86 @@ import static org.neo4j.tutorial.matchers.ContainsOnlySpecificTitles.containsOnl
  * graph operations. We'll mix indexes and core graph operations to explore the
  * Doctor's universe.
  */
-public class Koan05 {
+public class Koan05
+{
 
     private static EmbeddedDoctorWhoUniverse universe;
 
     @BeforeClass
-    public static void createDatabase() throws Exception {
+    public static void createDatabase() throws Exception
+    {
         universe = new EmbeddedDoctorWhoUniverse(new DoctorWhoUniverseGenerator());
     }
 
     @AfterClass
-    public static void closeTheDatabase() {
+    public static void closeTheDatabase()
+    {
         universe.stop();
     }
 
     @Test
-    public void shouldCountTheNumberOfDoctorsRegeneratedForms() {
+    public void shouldCountTheNumberOfDoctorsRegeneratedForms()
+    {
 
         Index<Node> actorsIndex = universe.getDatabase()
-                .index()
-                .forNodes("actors");
+                                          .index()
+                                          .forNodes("actors");
         int numberOfRegenerations = 1;
 
         // YOUR CODE GOES HERE
-        // hint: start from William Hartnel, the first actor who played the Doctor
-        Node firstDoctor = actorsIndex.get("actor", "William Hartnell").getSingle();
-        Relationship regeneratedTo = firstDoctor.getSingleRelationship(DoctorWhoRelationships.REGENERATED_TO, Direction.OUTGOING);
+        // SNIPPET_START
+        Node firstDoctor = actorsIndex.get("actor", "William Hartnell")
+                                      .getSingle();
 
-        while (regeneratedTo != null) {
+        Relationship regeneratedTo = firstDoctor.getSingleRelationship(DoctorWhoRelationships.REGENERATED_TO,
+                                                                       Direction.OUTGOING);
+
+        while (regeneratedTo != null)
+        {
             numberOfRegenerations++;
-            regeneratedTo = regeneratedTo.getEndNode().getSingleRelationship(DoctorWhoRelationships.REGENERATED_TO, Direction.OUTGOING);
+            regeneratedTo = regeneratedTo.getEndNode()
+                                         .getSingleRelationship(DoctorWhoRelationships.REGENERATED_TO,
+                                                                Direction.OUTGOING);
         }
+
+        // SNIPPET_END
 
         assertEquals(11, numberOfRegenerations);
     }
 
     @Test
-    public void shouldFindHumanCompanionsUsingCoreApi() {
+    public void shouldFindHumanCompanionsUsingCoreApi()
+    {
         HashSet<Node> humanCompanions = new HashSet<Node>();
 
         // YOUR CODE GOES HERE
-        // hint: start with theDoctor
-        Node theDoctor = universe.theDoctor();
-        Iterable<Relationship> companionRels = theDoctor.getRelationships(Direction.INCOMING, DoctorWhoRelationships.COMPANION_OF);
+        // SNIPPET_START
 
-        for (Relationship r : companionRels) {
-            Node companionNode = r.getStartNode();
-            if (companionNode.hasRelationship(DoctorWhoRelationships.IS_A)) {
-                Relationship specified = companionNode.getSingleRelationship(DoctorWhoRelationships.IS_A, Direction.OUTGOING);
-                String species = (String) specified.getEndNode().getProperty("species");
-                if (species.equals("Human")) {
+        Node human = universe.getDatabase()
+                             .index()
+                             .forNodes("species")
+                             .get("species", "Human")
+                             .getSingle();
+
+        Iterable<Relationship> relationships = universe.theDoctor()
+                                                       .getRelationships(Direction.INCOMING,
+                                                                         DoctorWhoRelationships.COMPANION_OF);
+        for (Relationship rel : relationships)
+        {
+            Node companionNode = rel.getStartNode();
+            if (companionNode.hasRelationship(Direction.OUTGOING, DoctorWhoRelationships.IS_A))
+            {
+                Relationship singleRelationship = companionNode.getSingleRelationship(DoctorWhoRelationships.IS_A,
+                                                                                      Direction.OUTGOING);
+                Node endNode = singleRelationship.getEndNode();
+                if (endNode.equals(human))
+                {
                     humanCompanions.add(companionNode);
                 }
             }
         }
+
+        // SNIPPET_END
 
         int numberOfKnownHumanCompanions = 38;
         assertEquals(numberOfKnownHumanCompanions, humanCompanions.size());
@@ -81,34 +107,44 @@ public class Koan05 {
     }
 
     @Test
-    public void shouldFindAllEpisodesWhereRoseTylerFoughtTheDaleks() {
+    public void shouldFindAllEpisodesWhereRoseTylerFoughtTheDaleks()
+    {
         Index<Node> friendliesIndex = universe.getDatabase()
-                .index()
-                .forNodes("characters");
+                                              .index()
+                                              .forNodes("characters");
         Index<Node> speciesIndex = universe.getDatabase()
-                .index()
-                .forNodes("species");
+                                           .index()
+                                           .forNodes("species");
         HashSet<Node> episodesWhereRoseFightsTheDaleks = new HashSet<Node>();
 
         // YOUR CODE GOES HERE
-        Node roseTyler = friendliesIndex.get("character", "Rose Tyler").getSingle();
-        Node daleks = speciesIndex.get("species", "Dalek").getSingle();
-        
-        for (Relationship roseEpisodes : roseTyler.getRelationships(Direction.OUTGOING, DoctorWhoRelationships.APPEARED_IN))
+        // SNIPPET_START
+
+        Node roseTyler = friendliesIndex.get("character", "Rose Tyler")
+                                        .getSingle();
+        Node daleks = speciesIndex.get("species", "Dalek")
+                                  .getSingle();
+
+        for (Relationship r1 : roseTyler.getRelationships(DoctorWhoRelationships.APPEARED_IN, Direction.OUTGOING))
         {
-            Node episode = roseEpisodes.getEndNode();
-            for (Relationship appearaedIn : episode.getRelationships(Direction.INCOMING, DoctorWhoRelationships.APPEARED_IN))
+            Node episode = r1.getEndNode();
+
+            for (Relationship r2 : episode.getRelationships(DoctorWhoRelationships.APPEARED_IN, Direction.INCOMING))
             {
-                Node alsoAppeared = appearaedIn.getStartNode();
-                if (alsoAppeared.equals(daleks))
-                        episodesWhereRoseFightsTheDaleks.add(episode);
+                if (r2.getStartNode()
+                      .equals(daleks))
+                {
+                    episodesWhereRoseFightsTheDaleks.add(episode);
+                }
             }
         }
+
+        // SNIPPET_END
 
         assertThat(
                 episodesWhereRoseFightsTheDaleks,
                 containsOnlyTitles("Army of Ghosts", "The Stolen Earth", "Doomsday", "Journey's End", "Bad Wolf",
-                        "The Parting of the Ways", "Dalek"));
+                                   "The Parting of the Ways", "Dalek"));
     }
 
 }

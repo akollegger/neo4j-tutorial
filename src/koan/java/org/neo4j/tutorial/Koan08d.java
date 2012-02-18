@@ -34,9 +34,14 @@ public class Koan08d
         String cql = null;
 
         // YOUR CODE GOES HERE
-        cql = "start tom=node:actors(actor='Tom Baker'),chris=node:actors(actor='Christopher Eccleston') " +
-                "match path=(tom)-[r:REGENERATED_TO*]->(chris) " +
-                " return length(path) as regenerations";
+        // SNIPPET_START
+
+        cql = "start eccleston = node:actors(actor = 'Christopher Eccleston'), baker = node:actors(actor = 'Tom Baker') "
+                + "match path = (baker)-[:REGENERATED_TO*]->(eccleston) "
+                + "return length(path) as regenerations";
+
+
+        // SNIPPET_END
 
         ExecutionResult result = engine.execute(cql);
 
@@ -50,11 +55,16 @@ public class Koan08d
         String cql = null;
 
         // YOUR CODE GOES HERE
-        cql="start master=node:characters(character='Master') " +
-                "match (master)-[:APPEARED_IN]->(first), arcs=(first)-[:NEXT*]->() " +
-                "where all(ep in nodes(arcs) where master-[:APPEARED_IN]->ep) " +
-                "return length(arcs) as noOfPathHops " +
+        // SNIPPET_START
+
+        cql = "start master = node:characters(character = 'Master')\n" +
+                "match (master)-[:APPEARED_IN]->(first), storyArcs = (first)-[:NEXT*]->()"+
+                "where all(ep in nodes(storyArcs) where master-[:APPEARED_IN]->ep)"+
+                "return length(storyArcs) as noOfPathHops\n" +
                 "order by noOfPathHops desc limit 1";
+
+
+        // SNIPPET_END
 
         ExecutionResult result = engine.execute(cql);
 

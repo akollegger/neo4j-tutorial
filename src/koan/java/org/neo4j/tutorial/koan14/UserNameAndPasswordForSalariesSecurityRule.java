@@ -11,6 +11,12 @@ public class UserNameAndPasswordForSalariesSecurityRule implements SecurityRule
         boolean loggedIn = false;
 
         // YOUR CODE GOES HERE
+        // SNIPPET_START
+
+        loggedIn = "Alice".equals(httpServletRequest.getHeader("X-Username")) && "1337".equals(
+                httpServletRequest.getHeader(
+                        "X-Password"));
+        // SNIPPET_END
 
         return loggedIn;
     }
@@ -20,6 +26,11 @@ public class UserNameAndPasswordForSalariesSecurityRule implements SecurityRule
         String uriPath = null;
 
         // YOUR CODE GOES HERE
+        // SNIPPET_START
+
+        uriPath = "/koan14";
+
+        // SNIPPET_END
 
         return uriPath;
     }
@@ -29,6 +40,11 @@ public class UserNameAndPasswordForSalariesSecurityRule implements SecurityRule
         String message = null;
 
         // YOUR CODE GOES HERE
+        // SNIPPET_START
+
+        message = "Unathorised without username and password";
+
+        // SNIPPET_END
 
         return message;
     }
