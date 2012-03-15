@@ -171,8 +171,8 @@ public class Koan08b
 
         ExecutionResult result = engine.execute(cql);
 
-        assertThat(result.dumpToString(), containsString(
-                "+------------------------------------------------------------------------------------------------------------+\n" +
+        assertThat(result.dumpToString().replaceAll("\\s",""), containsString(
+                ("+------------------------------------------------------------------------------------------------------------+\n" +
                         "| episode.episode | episode.title                | species                   | characters                    |\n" +
                         "+------------------------------------------------------------------------------------------------------------+\n" +
                         "| \"116\"           | \"Castrovalva\"                | List(null)                | List(Master)                  |\n" +
@@ -194,7 +194,7 @@ public class Koan08b
                         "| \"134\"           | \"Planet of Fire\"             | List(null)                | List(Master)                  |\n" +
                         "| \"135\"           | \"The Caves of Androzani\"     | List(null)                | List(Master)                  |\n" +
                         "+------------------------------------------------------------------------------------------------------------+"
-        ));
+                ).replaceAll("\\s","")));
 
         final List<String> columnNames = result.javaColumns();
         assertThat(columnNames,
